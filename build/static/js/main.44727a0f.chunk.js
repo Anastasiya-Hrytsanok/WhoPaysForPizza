@@ -1,0 +1,2 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[0],{3:function(e,n,t){e.exports=t(9)},8:function(e,n,t){},9:function(e,n,t){"use strict";t.r(n);var a=t(0),o=t.n(a),l=t(2),r=t.n(l);t(8);function c(){return o.a.createElement("div",{className:"App"},o.a.createElement("h1",null,"Hello CodeSandbox"),o.a.createElement("h2",null,"Start editing to see some magic happen!"))}var i=document.getElementById("root");r.a.render(o.a.createElement(a.StrictMode,null,o.a.createElement(c,null)),i)}},[[3,1,2]]]);
+//# sourceMappingURL=main.44727a0f.chunk.js.map
