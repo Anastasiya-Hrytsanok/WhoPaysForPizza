@@ -1,5 +1,5 @@
 import React from "react";
-import './component.css';
+import './component.sass';
 import Slice from "./Slice/Slice";
 import { calculateDegrees } from './utils';
 

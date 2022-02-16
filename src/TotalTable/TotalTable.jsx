@@ -1,6 +1,6 @@
 import React from "react";
 import { convertToByn, roundNumber, splitPrice } from "../utils";
-import "./component.css";
+import "./component.sass";
 import TableTotalRow from "./TableTotalRow/TableTotalRow";
 
 const TotalTable = ({ pizzaEaters, currencyExchangeRates, orderDetails, onPayClick, diets }) => {

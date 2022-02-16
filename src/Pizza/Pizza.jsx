@@ -1,5 +1,5 @@
 import React from "react";
-import './component.css';
+import './component.sass';
 import Slices from "./Slices/Slices";
 
 const Pizza = ({ pizzaEatersCount, orderDetails }) => {

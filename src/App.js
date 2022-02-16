@@ -1,6 +1,6 @@
 import React from "react";
 import Header from "./Header/Header";
-import "./component.css";
+import "./component.sass";
 import LoadButton from "./LoadButton/LoadButton";
 import Pizza from "./Pizza/Pizza";
 import { useState } from "react";

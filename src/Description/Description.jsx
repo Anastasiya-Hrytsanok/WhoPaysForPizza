@@ -1,5 +1,5 @@
 import React from "react";
-import "./component.css";
+import "./component.sass";
 
 const Description = ({ allPeople, pizzaEatersCount }) => {
   return (
