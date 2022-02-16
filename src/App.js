@@ -1,40 +1,50 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Header from "./Header/Header";
 import "./component.css";
 import LoadButton from "./LoadButton/LoadButton";
 import Pizza from "./Pizza/Pizza";
 import { useState } from "react";
 import Description from "./Description/Description";
+import TotalTable from "./TotalTable/TotalTable";
 
 export default function App() {
-  const [pizzaEatersCount, setPizzaEatersCount] = useState(0);
   const [error, setError] = useState(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [allPeople, setAllPeople] = useState(0);
-  const [pizzaEaters, setPizzaEaters] = useState([]);
-  const [vegeterians, setVegeterians] = useState([]);
   const [onceLoaded, setOnceLoaded] = useState(false);
+  const [orderDetails, setOrderDetails] = useState({});
+  const [currencyExchangeRates, setCurrencyExchangeRates] = useState({});
+  const [diets, setDiets] = useState([]);
 
   const fetchGuestsAsync = async () => {
-    const response = await fetch(
-      "https://gp-js-test.herokuapp.com/pizza/guests"
-    );
-    const data = await response.json();
-    return data.party;
+    try {
+      const response = await fetch(
+        "https://gp-js-test.herokuapp.com/pizza/guests"
+      );
+      const data = await response.json();
+      return data.party;
+    } catch (error) {
+      setError(error);
+      throw error;
+    }
   };
 
   const fetchDietsAsync = async (people) => {
     const peopleNamesEncoded = people.map(({ name }) =>
       encodeURIComponent(name)
     );
-    const response = await fetch(
-      `https://gp-js-test.herokuapp.com/pizza/world-diets-book/${peopleNamesEncoded.join()}`
-    );
-    const data = await response.json();
-    return data.diet;
+    try {
+      const response = await fetch(
+        `https://gp-js-test.herokuapp.com/pizza/world-diets-book/${peopleNamesEncoded.join()}`
+      );
+      const data = await response.json();
+      return data.diet;
+    } catch (error) {
+      setError(error);
+      throw error;
+    }
   };
 
-  // create a file with URL constants
   const fetchPizzaOrderAsync = async (pizzaType, sliceCount) => {
     try {
       const response = await fetch(
@@ -60,61 +70,94 @@ export default function App() {
   };
 
   const handleClick = async () => {
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-    const guests = await fetchGuestsAsync();
-    const pizzaEaters = guests.filter((element) => element.eatsPizza);
-    setPizzaEaters(pizzaEaters);
+      const guests = await fetchGuestsAsync();
+      setAllPeople(guests.length);
+      const pizzaEaters = guests.filter((element) => element.eatsPizza);
 
-    const diets = await fetchDietsAsync(pizzaEaters);
-    setVegeterians(diets.filter((element) => element.isVegan));
+      const diets = await fetchDietsAsync(pizzaEaters);
+      setDiets(diets.map((diet) => ({ ...diet, hasPaid: false })));
+      const vegans = diets.filter((element) => element.isVegan);
 
-    const [ orderDetails, currencyExchangeRates ] = await Promise.all([
-      fetchPizzaOrderAsync("vegan", 12),
-      fetchCurrencyExchangeRatesAsync(),
-    ]);
+      let pizzaType = "";
 
-    console.log('orderDetails', orderDetails);
-    console.log('currencyExchangeRates', currencyExchangeRates);
+      if (vegans.length / pizzaEaters.length >= 0.51) {
+        const pizzaWithOutMeat = ["vegan", "cheese"];
+        pizzaType =
+          pizzaWithOutMeat[Math.floor(Math.random() * pizzaWithOutMeat.length)];
+      } else {
+        pizzaType = "meat";
+      }
 
+      const [orderDetails, currencyExchangeRates] = await Promise.all([
+        fetchPizzaOrderAsync(pizzaType, pizzaEaters.length),
+        fetchCurrencyExchangeRatesAsync(),
+      ]);
+      setOrderDetails(orderDetails);
+      setCurrencyExchangeRates(currencyExchangeRates);
+      if (!onceLoaded) {
+        setOnceLoaded(true);
+      }
+    } catch (error) {
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetch("https://gp-js-test.herokuapp.com/pizza")
-      .then((response) => response.json())
-      .then((result) => {
-        setPizzaEatersCount(
-          result.party.filter((element) => element.eatsPizza).length
-        );
-        setAllPeople(result.party.length);
-        //   setIsLoaded(true);
-        // },
-        // (error) => {
-        //   setIsLoaded(true);
-        //   setError(error);
-        setIsLoading(false);
-        if (!onceLoaded) {
-          setOnceLoaded(true);
-        }
-      });
+  const handlePayClick = (name) => {
+    setDiets((diets) => {
+      const dietsCopy = [...diets];
+      const index = dietsCopy.findIndex((d) => d.name === name);
+      dietsCopy[index].hasPaid = true;
+      return dietsCopy;
+    });
   };
 
   return (
     <div>
       <Header />
-      <LoadButton onClick={handleClick} />
-      {isLoading ? (
-        <p> Waiting... </p>
+      <LoadButton onClick={handleClick} isLoading={isLoading} />
+      {!error ? (
+        <>
+          {isLoading ? (
+            <p> Waiting... </p>
+          ) : (
+            onceLoaded && (
+              <TotalTable
+                pizzaEaters={diets}
+                orderDetails={orderDetails}
+                currencyExchangeRates={currencyExchangeRates}
+                onPayClick={handlePayClick}
+                diets={diets}
+              />
+            )
+          )}
+          {isLoading ? (
+            <p> </p>
+          ) : (
+            onceLoaded && (
+              <Pizza
+                pizzaEatersCount={diets.length}
+                orderDetails={orderDetails}
+              />
+            )
+          )}
+          {isLoading ? (
+            <p> </p>
+          ) : (
+            onceLoaded && (
+              <Description
+                allPeople={allPeople}
+                pizzaEatersCount={diets.length}
+              />
+            )
+          )}
+        </>
       ) : (
-        onceLoaded && <Pizza pizzaEatersPersonsCount={pizzaEatersCount} />
-      )}
-      {isLoading ? (
-        <p> </p>
-      ) : (
-        onceLoaded && (
-          <Description
-            allPeople={allPeople}
-            pizzaEatersPersonsCount={pizzaEatersCount}
-          />
-        )
+        <p>Something went wrong :(</p>
       )}
     </div>
   );

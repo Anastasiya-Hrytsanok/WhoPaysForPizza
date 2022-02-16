@@ -2,15 +2,15 @@ import React from "react";
 import './component.css';
 import Slices from "./Slices/Slices";
 
-const Pizza = ({ pizzaEatersPersonsCount }) => {
+const Pizza = ({ pizzaEatersCount, orderDetails }) => {
     return <div className="pizza-container">
         <div className="pizza">
             <div className="tomato"></div>
             <div className="olives"></div>
-            <div className="pepperonis"></div>
+            {orderDetails.type === 'meat' && <div className='pepperonis'></div>}
             <div className="pepper"></div>
             <div className="basil"></div>
-            <Slices pizzaEatersPersonsCount={pizzaEatersPersonsCount}/>
+            <Slices pizzaEatersCount={pizzaEatersCount}/>
         </div>
     </div>;
 }
